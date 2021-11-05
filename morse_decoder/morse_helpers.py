@@ -56,7 +56,7 @@ def read_label_words(filename):
 
 
 
-def create_sets(set_names, image_shape, label_func, letter_n):
+def create_sets(set_names, image_shape, label_funcs, letter_n):
 
     extracts = []
     image_h, image_w, channels = image_shape
@@ -80,8 +80,10 @@ def create_sets(set_names, image_shape, label_func, letter_n):
         r = read_label_words(folder_name + file_name)
         morse_words = np.vstack([morse_words, r])
 
+    
 
-    return (np.concatenate(extracts), label_func(morse_words[0:,:10], letter_n, image_w))
+
+    return (np.concatenate(extracts), [label_func(morse_words[0:,:10], letter_n, image_w) for label_func in label_funcs])
 
 def convert_image_to_array(image_name, target_size):
     
@@ -89,6 +91,7 @@ def convert_image_to_array(image_name, target_size):
     img = image_process.img_to_array(img)
     img = img/255
     return img
+
 
 class Image_Generator(keras.utils.Sequence) :
     

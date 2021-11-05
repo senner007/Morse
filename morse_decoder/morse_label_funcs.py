@@ -64,7 +64,7 @@ letter_to_morse_dict_categorical = {
 
 
 
-def labels_to_one_hot_positions_categorical(morse_words, letter_n):
+def labels_to_one_hot_positions_categorical(morse_words, letter_n, image_w):
 
     morse_words = morse_words[0:,:1].reshape(-1,)
 
@@ -85,21 +85,33 @@ def labels_to_one_hot_positions_categorical(morse_words, letter_n):
     return np.array(morse_labels_one_hot)    
 
 
-def letter_n_to_one_hot_positions_categorical(morse_words, letter_n):
+def letters_arr_to_one_hot(arr):
+    labels_letter_one_hot = np.zeros((arr.size, 27))
+    labels_letter_one_hot[np.arange(arr.size),arr] = 1
+    return labels_letter_one_hot
+
+
+def letter_n_to_one_hot_positions_categorical(morse_words, letter_n, image_w):
 
     morse_words = morse_words[0:,:1].reshape(-1,)
+
+    print(letter_n)
+
+    print(morse_words)
     
     morse_labels_one_hot = []
 
     for morse_word in morse_words:
         
-        if (letter_n + 1 > len(morse_word)):
-            n = np.atleast_2d(0).T
+        if (letter_n > len(morse_word)):
+            n = 0
         else:
-            n = np.atleast_2d(code_number.index(morse_word[letter_n]) +1).T
+            n = code_number.index(morse_word[letter_n -1]) + 1
 
-       
+
         morse_labels_one_hot.append(n)
+
+
 
     return np.array(morse_labels_one_hot)  
 
