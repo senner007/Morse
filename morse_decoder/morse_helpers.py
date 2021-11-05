@@ -145,3 +145,22 @@ def zeropad_randomly(train_images, lbls, image_target_size):
 
     lbls_np = lbls_np + (n/image_target_size[1])
     return (train_images_padded, lbls_np)
+
+
+def create_all_sets(train, labels, TEST_SPLIT_SIZE, VALIDATION_SPLIT_SIZE, shuffle_before_test_split=True):
+
+    if shuffle_before_test_split == True:
+        # shuffle data
+        train, labels = unison_shuffle(train, labels)
+    
+    # get test slice
+    train, train_test, labels, labels_test = data_set_create(train, labels, TEST_SPLIT_SIZE)
+
+    if shuffle_before_test_split == False:
+        # shuffle data
+        train, labels = unison_shuffle(train, labels)
+
+    # get validation slice
+    train, train_validation, labels, labels_validation = data_set_create(train, labels, VALIDATION_SPLIT_SIZE)
+
+    return train, labels, train_validation, labels_validation, train_test, labels_test
