@@ -108,7 +108,7 @@ def letter_n_to_one_hot_positions_categorical(morse_words, letter_n, image_w):
         else:
             n = code_number.index(morse_word[letter_n -1]) + 1
 
-
+        # print(n)
         morse_labels_one_hot.append(n)
 
 
@@ -120,7 +120,7 @@ def position_regression(morse_words, letter_n, image_target_size):
 
     mw = (morse_words[0:, letter_n: letter_n +1].reshape(-1,))
 
-    print(image_target_size)
+    # print(image_target_size)
     
     return  mw.astype(np.float) / image_target_size
 
