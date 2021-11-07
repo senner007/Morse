@@ -106,7 +106,7 @@ def letter_n_to_one_hot_positions_categorical(morse_words, letter_n, image_w):
         if (letter_n > len(morse_word)):
             n = 0
         else:
-            n = code_number.index(morse_word[letter_n -1]) + 1
+            n = code_number.index(morse_word[letter_n -1])
 
         # print(n)
         morse_labels_one_hot.append(n)
