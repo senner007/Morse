@@ -16,20 +16,22 @@ def extract_from_bin(filename, image_x, image_y):
     return np.array([x.transpose() for x in morse_array_matrix])
 
 
-def create_morse_images(data_rows_list, foldername):
+def create_morse_images(data_rows_list, foldername, overwrite):
 
     morse_images_dir = foldername + "/"
 
-    # Delete all previous images in folder
-    for f in os.listdir(morse_images_dir):
-        os.remove(os.path.join(morse_images_dir, f))
+    # # Delete all previous images in folder
+    if overwrite:
+        for f in os.listdir(morse_images_dir):
+            os.remove(os.path.join(morse_images_dir, f))
 
     fnames = []
 
     for i in range(len(data_rows_list)):
         fname =  morse_images_dir +"%d" % i + ".png"
         fnames.append(fname)
-        cv2.imwrite(fname, data_rows_list[i])
+        if overwrite:
+            cv2.imwrite(fname, data_rows_list[i])
 
     return np.array(fnames)
 
@@ -41,12 +43,12 @@ def unison_shuffle(arr1, arr2):
 def round_to_100(n):
     return int(round(n,-2))
 
-def read_label_words(filename):
+def read_label_words(csv_file):
 
      # Read morse words
     morse_words = []
 
-    file1 = open(filename, 'r')
+    file1 = open(csv_file, 'r')
     Lines = file1.readlines()[1:]
 
     for line in Lines:
@@ -56,34 +58,25 @@ def read_label_words(filename):
 
 
 
-def create_sets(set_names, image_shape, label_funcs, letter_n):
+def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images):
 
-    extracts = []
+    total_image_names = []
     image_h, image_w, channels = image_shape
+    total_csv_columns = np.array([]).reshape(0,22)
 
     for set_name in set_names:
-        folder_name = set_name[0]
-        file_name = set_name[1]
-        ds = extract_from_bin(folder_name + file_name + '.bin', image_h, image_w)
+        folder_name,file_name, csv_file = set_name
+        data_rows = extract_from_bin(folder_name + file_name + '.bin', image_h, image_w)
         if not os.path.exists(file_name):
             os.makedirs(file_name)
-        image_name = create_morse_images(ds, file_name)
-        extracts.append(image_name)
+        image_names = create_morse_images(data_rows, file_name, overwrite_images)
+        total_image_names.append(image_names)
+        # Todo : use Pandas to get csv here !
+        csv_columns = read_label_words(folder_name + csv_file)
+        total_csv_columns = np.vstack([total_csv_columns, csv_columns])
 
 
-    morse_words = np.array([]).reshape(0,22)
-
-    # Todo : use Pandas to get csv here !
-    for set_name in set_names:  
-        folder_name = set_name[0] 
-        file_name = set_name[2]
-        r = read_label_words(folder_name + file_name)
-        morse_words = np.vstack([morse_words, r])
-
-    
-
-
-    return (np.concatenate(extracts), [label_func(morse_words[0:,:10], letter_n, image_w) for label_func in label_funcs])
+    return (np.concatenate(total_image_names), [label_func(total_csv_columns[0:,:10], letter_n, image_w) for label_func in label_funcs])
 
 def convert_image_to_array(image_name, target_size):
     
@@ -124,6 +117,7 @@ class Image_Generator(keras.utils.Sequence) :
 
         batch_y_letters = self.labels_to_one_hot(batch_y_letters)
 
+
         arrays = (np.array(train_image_lists), [batch_y_positions, batch_y_letters])
         return arrays
 
@@ -148,9 +142,9 @@ def zeropad_randomly(train_images, lbls, image_target_size):
     n = random.randint(-10, 15)
     lbls_np = np.array(lbls) 
     if (n > 0):
-        train_images_padded = [np.pad(img, [(0,0),(n,0), (0,0)], mode='constant')[:, :-1] for img in train_images]
+        train_images_padded = [np.pad(img, [(0,0),(n,0), (0,0)], mode='constant')[:, :1400] for img in train_images]
     else:
-        train_images_padded = [np.pad(img, [(0,0),(0,abs(n)), (0,0)], mode='constant')[:, abs(n):-1] for img in train_images]
+        train_images_padded = [np.pad(img, [(0,0),(0,abs(n)), (0,0)], mode='constant')[:, abs(n): 1400 + abs(n)] for img in train_images]
 
     lbls_np = lbls_np + (n/image_target_size[1])
     return (train_images_padded, lbls_np)
