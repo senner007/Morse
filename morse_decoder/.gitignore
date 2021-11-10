@@ -3,6 +3,6 @@
 /__pycache__
 *.pdf
 *.rtf
-/saved_model
+/saved_model*
 /saved_model*.txt
 /Module*
