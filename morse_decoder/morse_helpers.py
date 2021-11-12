@@ -86,16 +86,18 @@ def convert_image_to_array(image_name, target_size):
     img = img/255
     return img
 
+def return_label_positions(batch_positions, batch_letters):
+    return batch_positions
 
 class Image_Generator(keras.utils.Sequence) :
     
-    def __init__(self, image_filenames, labels, batch_size, image_target_size, image_prepocessors, labels_to_one_hot) :
+    def __init__(self, image_filenames, labels, batch_size, image_target_size, image_prepocessors, label_func) :
         self.image_filenames = image_filenames
         self.labels = labels
         self.batch_size = batch_size
         self.image_target_size = image_target_size
         self.image_prepocessors = image_prepocessors
-        self.labels_to_one_hot = labels_to_one_hot
+        self.label_func = label_func
         
     def __len__(self) :
         return (np.ceil(len(self.image_filenames) / float(self.batch_size))).astype(np.int)
@@ -108,7 +110,6 @@ class Image_Generator(keras.utils.Sequence) :
         batch_y_positions =  batch_y[:,0]
         batch_y_letters = batch_y[:,1]
 
-
         train_image_lists = []
         for img_name in batch_x:
             img = convert_image_to_array(img_name, self.image_target_size)
@@ -117,9 +118,7 @@ class Image_Generator(keras.utils.Sequence) :
         for image_preprocessor in self.image_prepocessors:
             train_image_lists, batch_y_positions = image_preprocessor(train_image_lists, batch_y_positions, self.image_target_size)
 
-        batch_y_letters = self.labels_to_one_hot(batch_y_letters)
-
-        arrays = np.array(train_image_lists) , batch_y_letters
+        arrays = np.array(train_image_lists) , self.label_func(batch_y_positions, batch_y_letters)
         return arrays
 
 
