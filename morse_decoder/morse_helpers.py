@@ -7,6 +7,7 @@ from tensorflow.keras.preprocessing import image as image_process
 from tensorflow import keras
 import os
 import random
+import decimal
 
 def extract_from_bin(filename, image_x, image_y):
     morse_array = np.fromfile(filename, dtype="uint8")
@@ -107,6 +108,7 @@ class Image_Generator(keras.utils.Sequence) :
         batch_y_positions =  batch_y[:,0]
         batch_y_letters = batch_y[:,1]
 
+
         train_image_lists = []
         for img_name in batch_x:
             img = convert_image_to_array(img_name, self.image_target_size)
@@ -117,8 +119,7 @@ class Image_Generator(keras.utils.Sequence) :
 
         batch_y_letters = self.labels_to_one_hot(batch_y_letters)
 
-
-        arrays = (np.array(train_image_lists), [batch_y_positions, batch_y_letters])
+        arrays = np.array(train_image_lists) , batch_y_letters
         return arrays
 
 
@@ -149,6 +150,39 @@ def zeropad_randomly(train_images, lbls, image_target_size):
     lbls_np = lbls_np + (n/image_target_size[1])
     return (train_images_padded, lbls_np)
 
+def add_noise_01(train_images, lbls, image_target_size):
+    mean = 0.0   # some constant
+    std = 0.1    # some constant (standard deviation)
+    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+    return (noisy_images, lbls)
+
+def add_noise_02(train_images, lbls, image_target_size):
+    mean = 0.0   # some constant
+    std = 0.2    # some constant (standard deviation)
+    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+    return (noisy_images, lbls)
+
+def add_noise_03(train_images, lbls, image_target_size):
+    mean = 0.0   # some constant
+    std = 0.3    # some constant (standard deviation)
+    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+    return (noisy_images, lbls)
+
+def add_noise_04(train_images, lbls, image_target_size):
+    mean = 0.0   # some constant
+    std = 0.4    # some constant (standard deviation)
+    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+    return (noisy_images, lbls)
+
+def add_noise_random(train_images, lbls, image_target_size):
+    r = std = random.randrange(0, 10)
+    if r < 5:
+        return (train_images, lbls)
+
+    mean = 0.0   # some constant
+    std = random.randrange(0, 20)/100
+    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+    return (noisy_images, lbls)
 
 def create_all_sets(train, labels, TEST_SPLIT_SIZE, VALIDATION_SPLIT_SIZE, shuffle_before_test_split=True):
 
