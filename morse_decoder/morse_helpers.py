@@ -16,7 +16,6 @@ def extract_from_bin(filename, image_x, image_y):
 
     return np.array([x.transpose() for x in morse_array_matrix])
 
-
 def create_morse_images(data_rows_list, foldername, overwrite):
 
     morse_images_dir = foldername + "/"
@@ -56,7 +55,6 @@ def read_label_words(csv_file):
         morse_words.append(line.rstrip().split(','))
 
     return np.array(morse_words)
-
 
 
 def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images):
@@ -116,7 +114,8 @@ class Image_Generator(keras.utils.Sequence) :
             train_image_lists.append(img)
 
         for image_preprocessor in self.image_prepocessors:
-            train_image_lists, batch_y_positions = image_preprocessor(train_image_lists, batch_y_positions, self.image_target_size)
+            ip = image_preprocessor["func"](image_preprocessor["params"])
+            train_image_lists, batch_y_positions = ip(train_image_lists, batch_y_positions, self.image_target_size)
 
         arrays = np.array(train_image_lists) , self.label_func(batch_y_positions, batch_y_letters)
         return arrays
@@ -138,50 +137,41 @@ def data_set_create(train_input, labels_input, slice_size):
 
 # Todo : standardize preprocessor to class object and return types.
 # Pass in padding bounds parameters 
-def zeropad_randomly(train_images, lbls, image_target_size):
-    n = random.randint(-10, 15)
-    lbls_np = np.array(lbls) 
-    if (n > 0):
-        train_images_padded = [np.pad(img, [(0,0),(n,0), (0,0)], mode='constant')[:, :1400] for img in train_images]
-    else:
-        train_images_padded = [np.pad(img, [(0,0),(0,abs(n)), (0,0)], mode='constant')[:, abs(n): 1400 + abs(n)] for img in train_images]
 
-    lbls_np = lbls_np + (n/image_target_size[1])
-    return (train_images_padded, lbls_np)
+def add_zeropad_random(params):
+    def zeropad_randomly(train_images, lbls, image_target_size):
+        n = random.randint(params[0], params[1])
+        lbls_np = np.array(lbls) 
+        if (n > 0):
+            train_images_padded = [np.pad(img, [(0,0),(n,0), (0,0)], mode='constant')[:, :1400] for img in train_images]
+        else:
+            train_images_padded = [np.pad(img, [(0,0),(0,abs(n)), (0,0)], mode='constant')[:, abs(n): 1400 + abs(n)] for img in train_images]
 
-def add_noise_01(train_images, lbls, image_target_size):
-    mean = 0.0   # some constant
-    std = 0.1    # some constant (standard deviation)
-    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
-    return (noisy_images, lbls)
+        lbls_np = lbls_np + (n/image_target_size[1])
+        return (train_images_padded, lbls_np)
+    
+    return zeropad_randomly
 
-def add_noise_02(train_images, lbls, image_target_size):
-    mean = 0.0   # some constant
-    std = 0.2    # some constant (standard deviation)
-    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
-    return (noisy_images, lbls)
+def add_noise(params):
+    def add_noise(train_images, lbls, image_target_size):
+        mean = 0.0   # some constant
+        noisy_images = [img + np.random.normal(mean, params, img.shape) for img in train_images]
+        return (noisy_images, lbls)
+    return add_noise
 
-def add_noise_03(train_images, lbls, image_target_size):
-    mean = 0.0   # some constant
-    std = 0.3    # some constant (standard deviation)
-    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
-    return (noisy_images, lbls)
+def add_noise_random(params):
+    def add_noise(train_images, lbls, image_target_size):
+        r = std = random.randrange(0, 10)
+        if r < 5:
+            return (train_images, lbls)
 
-def add_noise_04(train_images, lbls, image_target_size):
-    mean = 0.0   # some constant
-    std = 0.4    # some constant (standard deviation)
-    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
-    return (noisy_images, lbls)
+        mean = 0.0   # some constant
+        std = random.randrange(params[0], params[1])/100
+        noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+        return (noisy_images, lbls)
+    
+    return add_noise
 
-def add_noise_random(train_images, lbls, image_target_size):
-    r = std = random.randrange(0, 10)
-    if r < 5:
-        return (train_images, lbls)
-
-    mean = 0.0   # some constant
-    std = random.randrange(0, 20)/100
-    noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
-    return (noisy_images, lbls)
 
 def create_all_sets(train, labels, TEST_SPLIT_SIZE, VALIDATION_SPLIT_SIZE, shuffle_before_test_split=True):
 
