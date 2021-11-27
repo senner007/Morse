@@ -7,3 +7,4 @@
 /saved_model*.txt
 /Module*
 results*.*
+/.ipynb_checkpoints

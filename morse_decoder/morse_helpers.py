@@ -41,25 +41,12 @@ def unison_shuffle(arr1, arr2):
 def round_to_100(n):
     return int(round(n,-2))
 
-def read_label_words(csv_file):
-
-     # Read morse words
-    morse_words = []
-
-    file1 = open(csv_file, 'r')
-    Lines = file1.readlines()[1:]
-
-    for line in Lines:
-        morse_words.append(line.rstrip().split(','))
-
-    return np.array(morse_words)
-
 
 def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images):
 
     total_image_names = []
     image_h, image_w, channels = image_shape
-    total_csv_columns = np.array([]).reshape(0,22)
+    total_csv_rows = pd.DataFrame()
 
     for set_name in set_names:
         folder_name,file_name, csv_file = set_name
@@ -68,12 +55,18 @@ def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images)
             os.makedirs(file_name)
         image_names = create_morse_images(data_rows, file_name, overwrite_images)
         total_image_names.append(image_names)
-        # Todo : use Pandas to get csv here !
-        csv_columns = read_label_words(folder_name + csv_file)
-        total_csv_columns = np.vstack([total_csv_columns, csv_columns])
+
+        csv_rows = pd.read_csv(folder_name + csv_file)
+
+        total_csv_rows = total_csv_rows.append(csv_rows)
+
+        # if (total_csv_rows.shape[1] != csv_rows.shape[1]):
+        #     total_csv_rows = total_csv_rows.reshape(0, csv_rows.shape[1])
+
+        # total_csv_rows = np.append(total_csv_rows, csv_rows, axis=0)
 
 
-    return (np.concatenate(total_image_names), [label_func(total_csv_columns[0:,:10], letter_n, image_w) for label_func in label_funcs])
+    return (np.concatenate(total_image_names), [label_func(total_csv_rows, letter_n, image_w) for label_func in label_funcs])
 
 def convert_image_to_array(image_name, target_size):
     
