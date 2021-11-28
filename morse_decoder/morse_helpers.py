@@ -57,13 +57,7 @@ def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images)
         total_image_names.append(image_names)
 
         csv_rows = pd.read_csv(folder_name + csv_file)
-
         total_csv_rows = total_csv_rows.append(csv_rows)
-
-        # if (total_csv_rows.shape[1] != csv_rows.shape[1]):
-        #     total_csv_rows = total_csv_rows.reshape(0, csv_rows.shape[1])
-
-        # total_csv_rows = np.append(total_csv_rows, csv_rows, axis=0)
 
 
     return (np.concatenate(total_image_names), [label_func(total_csv_rows, letter_n, image_w) for label_func in label_funcs])
@@ -75,8 +69,8 @@ def convert_image_to_array(image_name, target_size):
     img = img/255
     return img
 
-def return_label_positions(batch_positions, batch_letters):
-    return batch_positions
+def return_label_positions(labels):
+    return labels
 
 class Image_Generator(keras.utils.Sequence) :
     
@@ -96,9 +90,6 @@ class Image_Generator(keras.utils.Sequence) :
         batch_x = self.image_filenames[idx * self.batch_size : (idx+1) * self.batch_size]
         batch_y = self.labels[idx * self.batch_size : (idx+1) * self.batch_size]
 
-        batch_y_positions =  batch_y[:,0]
-        batch_y_letters = batch_y[:,1]
-
         train_image_lists = []
         for img_name in batch_x:
             img = convert_image_to_array(img_name, self.image_target_size)
@@ -106,9 +97,9 @@ class Image_Generator(keras.utils.Sequence) :
 
         for image_preprocessor in self.image_prepocessors:
             ip = image_preprocessor["func"](image_preprocessor["params"])
-            train_image_lists, batch_y_positions = ip(train_image_lists, batch_y_positions, self.image_target_size)
+            train_image_lists, batch_y = ip(train_image_lists, batch_y, self.image_target_size)
 
-        arrays = np.array(train_image_lists) , self.label_func(batch_y_positions, batch_y_letters)
+        arrays = np.array(train_image_lists) , self.label_func(batch_y)
         return arrays
 
 
@@ -121,7 +112,6 @@ def data_slice(train_data, slice_size):
 def data_set_create(train_input, labels_input, slice_size):
 
     train, train_slice = data_slice(train_input, slice_size)
-
     labels, labels_slice = data_slice(labels_input, slice_size)
 
     return (train, train_slice, labels, labels_slice)
