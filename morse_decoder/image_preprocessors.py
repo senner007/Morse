@@ -1,6 +1,7 @@
 import numpy as np
 import random
-
+from numpy import array, exp
+from skimage import data, exposure, img_as_float
 
 # Todo : standardize preprocessor to class object and return types.
 # Pass in padding bounds parameters 
@@ -18,12 +19,22 @@ def add_zeropad_random(params):
     
     return zeropad_randomly
 
-def add_noise(params):
+def add_noise(noise_level):
     def add_noise(train_images, labels, image_target_size):
         mean = 0.0   # some constant
-        noisy_images = [img + np.random.normal(mean, params, img.shape) for img in train_images]
+        noisy_images = [normalized_noise(img, mean, noise_level) for img in train_images]
         return (noisy_images, labels)
     return add_noise
+
+def sigmoid(img):
+    return 1 / (1 + exp(-img))
+
+def normalized_noise(img, mean, std):
+    img_noise_orig = img + np.random.normal(mean, std, img.shape)
+    # squish through sigmoid
+    img_noise_orig_sig = sigmoid(img_noise_orig)
+    # scale values back between 0 and 1
+    return exposure.rescale_intensity(img_noise_orig_sig)
 
 def add_noise_random(params):
     def add_noise(train_images, labels, image_target_size):
@@ -33,7 +44,7 @@ def add_noise_random(params):
 
         mean = 0.0   # some constant
         std = random.randrange(params[0], params[1])/100
-        noisy_images = [img + np.random.normal(mean, std, img.shape) for img in train_images]
+        noisy_images = [normalized_noise(img, mean, std) for img in train_images]
         return (noisy_images, labels)
     
     return add_noise
