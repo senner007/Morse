@@ -41,10 +41,16 @@ def unison_shuffle(arr1, arr2):
 def round_to_100(n):
     return int(round(n,-2))
 
+def filter_dataset(masks, csv_rows, image_names):
+    for mask in masks:
+        masks_curry = mask["func"](mask["params"])
+        csv_rows, image_names = masks_curry(csv_rows, image_names)
+    
+    return csv_rows, image_names
 
-def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images):
+def get_data(set_names, image_shape, overwrite_images, masks):
 
-    total_image_names = []
+    total_image_names = np.array([])
     image_h, image_w, channels = image_shape
     total_csv_rows = pd.DataFrame()
 
@@ -54,13 +60,22 @@ def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images)
         if not os.path.exists(file_name):
             os.makedirs(file_name)
         image_names = create_morse_images(data_rows, file_name, overwrite_images)
-        total_image_names.append(image_names)
-
         csv_rows = pd.read_csv(folder_name + csv_file)
-        total_csv_rows = total_csv_rows.append(csv_rows)
+
+        # Filter data set
+        csv_rows_masked, image_names_masked = filter_dataset(masks, csv_rows, image_names)
+
+        total_image_names = np.concatenate([total_image_names, image_names_masked])
+        total_csv_rows = total_csv_rows.append(csv_rows_masked)
+   
+    return total_csv_rows, total_image_names
 
 
-    return (np.concatenate(total_image_names), [label_func(total_csv_rows, letter_n, image_w) for label_func in label_funcs])
+def create_sets(set_names, image_shape, label_funcs, letter_n, overwrite_images, masks):
+
+    total_csv_rows, total_image_names = get_data(set_names, image_shape, overwrite_images, masks)
+
+    return (total_image_names, [label_func(total_csv_rows, letter_n, image_shape[1]) for label_func in label_funcs])
 
 def convert_image_to_array(image_name, target_size):
     
