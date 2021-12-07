@@ -6,15 +6,15 @@ def min_n_letters(letters):
         return dataFrame[mask], fileNames[mask]
     return min_n_letters
 
-def takePercent(percent):
-    def takePercent(dataFrame, fileNames):
+def take_percent(percent):
+    def take_percent(dataFrame, fileNames):
         fileNames = fileNames[0:int(fileNames.size * (percent/100))]
         dataFrame = dataFrame[0:int(dataFrame.shape[0] * percent/100)]
         return dataFrame, fileNames
-    return takePercent
+    return take_percent
 
-def tempoInterval(params):
-    def takePercent(dataFrame, fileNames):
+def tempo_interval(params):
+    def take_percent(dataFrame, fileNames):
         mask = (dataFrame['Tempo'] >= params[0]) & (dataFrame['Tempo'] <= params[1])
         return dataFrame[mask], fileNames[mask]
-    return takePercent
+    return take_percent
