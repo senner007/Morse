@@ -120,6 +120,10 @@ def velocity_regression(data_frame, letter_n, image_width):
 
     return  data_frame["Tempo"].values.astype(np.float) / 100
 
+def velocity_regression_v2(data_frame, letter_n, image_width):
+
+    return  (data_frame["Tempo"].values.astype(np.float) / data_frame["Tempo Diff"].values.astype(np.float)) / 100
+
     
 def labels_to_one_hot(morse_words):
 
