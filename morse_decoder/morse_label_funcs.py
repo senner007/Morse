@@ -93,14 +93,14 @@ def letters_arr_to_one_hot(arr):
 
 def letter_n_to_index(csv_rows, letter_n, image_w):
 
-    morse_words = csv_rows["WORD"].values
+    morse_words = csv_rows["WORD"].apply(str).values
 
     letter_n_int = int(letter_n[1:])
     
     morse_letters_indexes = np.array([])
 
     for morse_word in morse_words:
-        
+
         if (letter_n_int > len(morse_word)):
             n = 0
         else:
