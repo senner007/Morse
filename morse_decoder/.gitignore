@@ -1,6 +1,6 @@
-/words*
-/training_data
-/__pycache__
+words*/
+training_data/
+__pycache__/
 *.pdf
 *.rtf
 /saved_mod*
