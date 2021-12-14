@@ -59,3 +59,17 @@ def cut_and_center(params, cut_margin=3):
 
         return (cut_images, np.array([labels_position, labels_letters]))
     return cut_and_center
+
+def cut_and_right_align(params, cut_margin=5):
+    def cut_and_right_align(train_images, labels, image_target_size):
+        cut_images = []
+        labels_position = labels[:,0]
+        labels_letters = labels[:,1]
+        for i in range(len(train_images)):
+            train_images[i][:, int(labels_position[i] * image_target_size[1]) + cut_margin:] = 0
+            pad_width = int(params[0] - (labels_position[i] * image_target_size[1]))
+            train_image_padded = np.pad(train_images[i], [(0,0),(pad_width,0), (0,0)], mode='constant')[:, :image_target_size[1]]
+            cut_images.append(train_image_padded)
+
+        return (cut_images, np.array([labels_position, labels_letters]))
+    return cut_and_right_align
