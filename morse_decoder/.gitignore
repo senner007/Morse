@@ -10,3 +10,4 @@ results*.*
 /.ipynb_checkpoints
 /velocity_log
 /regression_log
+/categorical_log
