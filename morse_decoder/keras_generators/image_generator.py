@@ -26,7 +26,7 @@ class Image_Generator(keras.utils.Sequence) :
             train_image_lists.append(img)
 
         for processor in self.image_prepocessors:
-            ip = processor.processor(processor.params)
+            ip = processor["func"](processor["params"])
             train_image_lists, batch_y = ip(train_image_lists, batch_y, self.image_target_size)
 
         arrays = np.array(train_image_lists) , self.label_func(batch_y)

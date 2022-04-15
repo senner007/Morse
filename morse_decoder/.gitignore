@@ -8,3 +8,4 @@ __pycache__/
 /Module*
 results*.*
 /.ipynb_checkpoints
+/velocity_log
