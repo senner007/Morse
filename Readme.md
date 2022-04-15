@@ -6,3 +6,4 @@
 - Log batch size to results
 - Collect global variables for all training and fft-flows. eg. tempo interval, cropping, image size etc
 - fix json serialize model config in categorical data log
+- add type checking to logging class properties
