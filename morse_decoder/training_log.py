@@ -26,5 +26,13 @@ class Training_Data_Log:
     model_optimizer = None
     model_history = None
     model_history_final_epoch = None
-    total_epochs = None
     results = None
+
+    def _get_total_epochs(self):
+        return self.__total_epochs
+    def _set_total_epochs(self, value):
+        if not isinstance(value, int):
+            raise TypeError("total_epochs must be set to an integer")
+        self.__total_epochs = value
+
+    total_epochs = property(_get_total_epochs, _set_total_epochs)
