@@ -1,14 +1,6 @@
 import numpy as np
 import random
-from numpy import array, exp
-from skimage import data, exposure, img_as_float
-import scipy
 from image_process.image_process_helpers import shift_images_randomly, add_normalized_noise
-
-class Preprocess:
-  def __init__(self, processor, params):
-    self.processor = processor
-    self.params = params
 
 def shift_random_update_positions(params):
     def shift_random_update_positions(train_images, labels, image_target_size):
