@@ -39,3 +39,10 @@ def fit_image_length(fft_image, size=(5,1400)):
 
 def expand_image_dims(fft_image):
     return np.expand_dims(fft_image, axis=0)
+
+def train_img_generate(signal, jump):
+    spectrum_normalized, columns = stfft(signal.astype(np.float32), int(jump), normalizer)
+    highest_rows = get_highest_rows(spectrum_normalized) 
+    image_cut = cut_fft_image(spectrum_normalized, highest_rows)
+    image_fitted = fit_image_length(image_cut)
+    return image_fitted
