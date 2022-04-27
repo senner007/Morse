@@ -3,8 +3,7 @@ import numpy as np
 from scipy import signal
 from scipy.fft import fft
 
-class NoiseHandling(object):
- #   def __init__(self, name):
+class NoiseHandling(object): #   def __init__(self, name):
     Fs=6000                # Sample frekvens
     Fhigh=2200              # High Cut-off frequency
     Flow=200                # Low  Cut-off frequency
@@ -28,10 +27,10 @@ class NoiseHandling(object):
         rx1 = np.random.normal(0,1, len(Sarray))
         Anoise=signal.filtfilt(NoiseHandling.BfHigh,NoiseHandling.AfHigh,rx1)
         Anoise=signal.filtfilt(NoiseHandling.BfLow,NoiseHandling.AfLow,Anoise)
-        rms2=np.std(Anoise)
-        Anoise=Anoise/rms2
+        rmsNoise=np.std(Anoise)
+     #   Anoise=Anoise
         SNRfac=np.power(10,SNRdB/20.)
-        Anoise=rms1*Anoise/SNRfac
+        Anoise=Anoise/(SNRfac*rmsNoise)
         Narray=Sarray+Anoise
         return Narray, Anoise
     
