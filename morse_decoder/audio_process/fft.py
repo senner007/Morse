@@ -1,6 +1,7 @@
 from scipy.fft import fft
 import numpy as np
 
+
 def stfft(signal, jump, normalizer):
     fft_length=128
     signal_length = signal.shape[0]
@@ -33,6 +34,8 @@ def cut_fft_image(fft_image, highest_rows_indexes):
     return fft_image[highest_rows_indexes.min() -1: highest_rows_indexes.min() +4]
 
 def fit_image_length(fft_image, size=(5,1400)):
+    if fft_image.shape[1] > size[1]: # cut fft image if more than allowed width
+        fft_image = fft_image[:, :size[1]]
     spectrum_ext = np.zeros(size)
     spectrum_ext[:,:fft_image.shape[1]] = fft_image
     return spectrum_ext
@@ -42,7 +45,8 @@ def expand_image_dims(fft_image):
 
 def train_img_generate(signal, jump):
     spectrum_normalized, columns = stfft(signal.astype(np.float32), int(jump), normalizer)
-    highest_rows = get_highest_rows(spectrum_normalized) 
-    image_cut = cut_fft_image(spectrum_normalized, highest_rows)
+    # highest_rows = get_highest_rows(spectrum_normalized) 
+    # print(type(highest_rows), highest_rows)
+    image_cut = cut_fft_image(spectrum_normalized, np.array([22,21])) # hardcoded rows to look for
     image_fitted = fit_image_length(image_cut)
     return image_fitted
