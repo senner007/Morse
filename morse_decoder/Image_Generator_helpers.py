@@ -71,25 +71,24 @@ class DataSets:
         data_buffer_path = self.global_path + self.set_paths_list[set_choice].long16_bin
         return Random_Item(data_buffer_path, self.get_item_from_csv(set_choice))
     
+    def get_item(self, random_set: Random_Item):
 
-def get_item(random_set: Random_Item):
+        csv_row = random_set.csv_row
 
-    csv_row = random_set.csv_row
+        siglen = np.int32(csv_row[idx_signal_length].values[0])
+        currentpos = np.int32(csv_row[idx_current_position].values[0])
+        data_buffered: BufferedReader = open(random_set.buffer_path, "rb")
+        #### numpy_data = np.fromfile(data_buffered, dtype=np.int16)
+        byte_step = 2
 
-    siglen = np.int32(csv_row[idx_signal_length].values[0])
-    currentpos = np.int32(csv_row[idx_current_position].values[0])
-    data_buffered: BufferedReader = open(random_set.buffer_path, "rb")
-    #### numpy_data = np.fromfile(data_buffered, dtype=np.int16)
-    byte_step = 2
+        data_buffered.seek(int(currentpos * byte_step))
+        ints = np.zeros((siglen,), int)
+        for x in range(siglen):
+            raw = data_buffered.read(byte_step)
+            ints[x] = int.from_bytes(raw, byteorder="little", signed=True)
 
-    data_buffered.seek(int(currentpos * byte_step))
-    ints = np.zeros((siglen,), int)
-    for x in range(siglen):
-        raw = data_buffered.read(byte_step)
-        ints[x] = int.from_bytes(raw, byteorder="little", signed=True)
-
-    data_buffered.close()
-    
-    #### print(ints)
-    #### print( numpy_data[currentpos:currentpos + siglen])
-    return np.float64(ints) * csv_row[idx_scale_factor].values.astype(np.float64)[0]
+        data_buffered.close()
+        
+        #### print(ints)
+        #### print( numpy_data[currentpos:currentpos + siglen])
+        return np.float64(ints) * csv_row[idx_scale_factor].values.astype(np.float64)[0]
