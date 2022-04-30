@@ -29,31 +29,28 @@ set_paths = [
 ]
 
 class Buffers_Class:
-    data_buffer = BufferedReader
-    index_buffer = BufferedReader
+    data_buffer : BufferedReader
     index_array :  np.ndarray
-    def __init__(self, data_buffer, index_buffer, index_array):
+    def __init__(self, data_buffer, index_array):
         self.data_buffer = data_buffer
-        self.index_buffer = index_buffer
         self.index_array = index_array
 
 class Random_Item:
-    data_buffer = BufferedReader
-    index_buffer = BufferedReader
+    data_buffer : BufferedReader
     index_array :  np.ndarray
     csv_row : pd.DataFrame
-    def __init__(self, data_buffer, index_buffer, index_array, csv_row):
+    def __init__(self, data_buffer, index_array, csv_row):
         self.data_buffer = data_buffer
-        self.index_buffer = index_buffer
         self.index_array = index_array
         self.csv_row = csv_row
 
 class DataSets:
     set_paths_list : "list[Set_Paths]"
     csv_files : "list[pd.DataFrame]" = []
-    def __init__(self, sets, global_path):
-        self.set_paths_list = sets
+    def __init__(self, set_paths_list, global_path, masks = ""):
+        self.set_paths_list = set_paths_list
         self.global_path = global_path
+        self.masks = masks
         self.__cache_csv_files()
         self.buffer_store : list[Buffers_Class]= []
         self.__set_buffers()
@@ -68,8 +65,9 @@ class DataSets:
             dta_buffer: BufferedReader = open(self.global_path + setx.long16_bin, "rb")
             idx_buffer: BufferedReader = open(self.global_path + setx.long16_index, "rb")
             idx_array = np.fromfile(idx_buffer, dtype=np.float64)
+            idx_buffer.close()
 
-            self.buffer_store.append(Buffers_Class(dta_buffer, idx_buffer, np.reshape(idx_array, (-1,3))))
+            self.buffer_store.append(Buffers_Class(dta_buffer, np.reshape(idx_array, (-1,3))))
 
     def get_item_from_csv(self, set_choice, item_choice):
         csv: pd.DataFrame = self.csv_files[set_choice]
@@ -80,13 +78,11 @@ class DataSets:
         set_choice: int  = random.choice(random_range)
         random_buffers = self.buffer_store[set_choice]
         item_choice = np.random.randint(0 , random_buffers.index_array.shape[0])
-        return Random_Item(random_buffers.data_buffer, random_buffers.index_buffer, random_buffers.index_array[item_choice], self.get_item_from_csv(set_choice, item_choice))
+        return Random_Item(random_buffers.data_buffer, random_buffers.index_array[item_choice], self.get_item_from_csv(set_choice, item_choice))
 
     def close_files(self):
         for buffers in self.buffer_store:
-            buffers.data_buffer.close()
-            buffers.index_buffer.close()
-       
+            buffers.data_buffer.close()     
 
 def get_item(random_set: Random_Item):
 
