@@ -7,3 +7,7 @@
 - Collect global variables for all training and fft-flows. eg. tempo interval, cropping, image size etc
 - fix json serialize model config in categorical data log
 - add type checking to logging class properties
+- random noise on each image in batch
+- experiment with crop width on velocity prediction 
+- crop width to json
+- fix json on raw data

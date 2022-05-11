@@ -47,10 +47,15 @@ class DataSets:
     def __init__(self, set_paths_list, global_path, masks = ""):
         self.set_paths_list = set_paths_list
         self.global_path = global_path
-        self.masks = masks
-        self.__cache_csv_files()
+        self.__cache_dataframes()
+        self.__apply_masks(masks)
 
-    def __cache_csv_files(self):
+    def __apply_masks(self, masks):
+        for mask in masks:
+            for idx, csv in enumerate(self.csv_files):
+                self.csv_files[idx] = mask(csv)
+
+    def __cache_dataframes(self):
         for set_path in self.set_paths_list:
             csv: pd.DataFrame = read_csv(self.global_path + set_path.csv_file)
             idx_buffer: BufferedReader = open(self.global_path + set_path.long16_index, "rb")

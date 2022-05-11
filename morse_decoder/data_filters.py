@@ -1,8 +1,17 @@
 import numpy as np
 
+def min_letter_mask(dataFrame, letters: int):
+    return (dataFrame['WORD'].str.split(expand=True).apply(lambda x: x.str.len()) >= letters).any(axis=1)
+
+def min_n_letters_raw(letters):
+    def min_n_letters(dataFrame):
+        mask = min_letter_mask(dataFrame, letters)
+        return dataFrame[mask]
+    return min_n_letters
+
 def min_n_letters(letters):
     def min_n_letters(dataFrame, fileNames):
-        mask = (dataFrame['WORD'].str.split(expand=True).apply(lambda x: x.str.len()) >= letters).any(axis=1)
+        mask = min_letter_mask(dataFrame, letters)
         return dataFrame[mask], fileNames[mask]
     return min_n_letters
 

@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from image_process.image_process_helpers import shift_images_randomly, add_normalized_noise
+from random import randrange
 
 def shift_random_update_positions(params):
     def shift_random_update_positions(train_images, labels, image_target_size):
@@ -14,6 +15,23 @@ def shift_randomly(params):
     def shift_randomly(train_images, labels, image_target_size):
         train_images_padded, n = shift_images_randomly(train_images, params, image_target_size)
         return (train_images_padded, labels)
+    
+    return shift_randomly
+
+def shift_randomly_binary_labels(params):
+    def shift_randomly(images, labels, image_target_size):
+        shifted_images = images.copy()
+        labels_binary = labels.copy()
+        for idx, img in enumerate(images):
+            shift = randrange(*params)
+            shift_nothing = randrange(0,10) == 1
+            if (shift_nothing == True):
+                shift = 0
+            shifted_left = np.pad(img, [(0,0),(0,abs(shift))], mode='constant')[:, abs(shift): image_target_size[1] + abs(shift)]
+            labels_binary[idx] = 0 if shift > -150 else 1
+            shifted_images[idx] = shifted_left
+            
+        return (shifted_images, labels_binary)
     
     return shift_randomly
 

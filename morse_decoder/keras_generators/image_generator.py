@@ -4,6 +4,7 @@ from morse_helpers import convert_image_to_array
 from noise_generator.noisegen import NoiseHandling
 from audio_process.fft import expand_image_dims, train_img_generate
 from Image_Generator_helpers import DataSets, set_paths, global_path, Random_Item
+from random import randrange
 
 class Image_Generator(keras.utils.Sequence) :
     
@@ -37,15 +38,18 @@ class Image_Generator(keras.utils.Sequence) :
 
 class Image_Generator_RAW(keras.utils.Sequence) :
     
-    def __init__(self, image_amount, set_obj: DataSets, FFT_JUMP, batch_size, image_target_size, image_prepocessors, label_func) :
+    def __init__(self, image_amount, set_obj: DataSets, FFT_JUMP, batch_size, image_target_size, image_prepocessors, noise_range, random_signal_indent, label_func) :
         self.FFT_JUMP = FFT_JUMP
         self.set_obj = set_obj
-        self.image_amout = image_amount
+        self.image_amount = image_amount
         self.batch_size = batch_size
         self.image_target_size = image_target_size
         self.image_prepocessors = image_prepocessors
+        self.noise_range= noise_range
+        self.random_signal_indent = random_signal_indent
         self.label_func = label_func
         self.__set_noise()
+
     
     def __set_noise(self):
         self.cnoise = NoiseHandling()
@@ -56,20 +60,22 @@ class Image_Generator_RAW(keras.utils.Sequence) :
         return signal_noise
         
     def __len__(self) :
-        return (np.ceil(len(self.image_amount) / float(self.batch_size))).astype(np.int32)
+        return (np.ceil(self.image_amount) / float(self.batch_size)).astype(np.int32)
     
     
     def __getitem__(self, idx) :
 
         random_sets = [self.set_obj.get_random() for n in range(self.batch_size)]
         random_signals = [self.set_obj.get_item(random_set) for random_set in random_sets]
-        signals_shiftet = [np.insert(signal, 0, np.zeros(0), axis=0) for signal in random_signals] ## prepend with 12840 zeros to align with image pixel 200
-        signal_noises = [self.__apply_noise(signal, 30) for signal in signals_shiftet]
+        signals_shiftet = [np.insert(signal, 0, np.zeros(self.random_signal_indent[0] if self.random_signal_indent[0] == self.random_signal_indent[1] else randrange(*self.random_signal_indent)), axis=0) for signal in random_signals] ## prepend with 12840 zeros to align with image pixel 200
+        signal_noises = [self.__apply_noise(signal, randrange(self.noise_range[0], self.noise_range[1])) for signal in signals_shiftet]
         images_noise = [train_img_generate(signal_noise, self.FFT_JUMP) for signal_noise in signal_noises]
+
+        labels = np.array(self.label_func(random_sets))
 
         for processor in self.image_prepocessors:
             ip = processor["func"](processor["params"])
-            train_image_lists, batch_y = ip(images_noise, batch_y, self.image_target_size)
+            images_noise, labels = ip(images_noise, labels, self.image_target_size)
 
-        arrays = np.array(train_image_lists) , self.label_func(batch_y)
+        arrays =  np.array(images_noise), labels
         return arrays
