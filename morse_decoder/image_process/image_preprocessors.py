@@ -35,6 +35,22 @@ def shift_randomly_binary_labels(params):
     
     return shift_randomly
 
+def shift_randomly_position_labels(params):
+    def shift_randomly(images, labels, image_target_size):
+        shifted_images = images.copy()
+        labels_binary = labels.copy()
+        for idx, img in enumerate(images):
+            shift = randrange(*params)
+            shifted_left = np.pad(img, [(0,0),(0,abs(shift))], mode='constant')[:, abs(shift): image_target_size[1] + abs(shift)]
+            labels_binary[idx] = (labels[idx] + shift + 200) / 1400
+            shifted_images[idx] = shifted_left
+            
+        return (shifted_images, labels_binary)
+    
+    return shift_randomly
+
+
+
 def add_noise(noise_level):
     def add_noise(train_images, labels, image_target_size):
         mean = 0.0
