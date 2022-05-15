@@ -1,6 +1,7 @@
 import json
 import time
 from multiprocessing import Pool
+import numpy as np
 
 def log_training(data_log):
     return {
@@ -42,6 +43,9 @@ class Training_Data_Log:
 
 def binary_comparer(prediction, correct):
     return round(prediction[0]) == round(correct)
+
+def categorical_comparer(prediction, correct):
+    return np.argmax(prediction) == np.argmax(correct)
 
 
 def get_deviating_predictions(generator, model, comparer):

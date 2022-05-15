@@ -19,7 +19,7 @@ def shift_randomly(params):
     return shift_randomly
 
 def shift_randomly_binary_labels(params):
-    def shift_randomly(images, labels, image_target_size):
+    def shift_randomly_binary_labels_curry(images, labels, image_target_size):
         shifted_images = images.copy()
         labels_binary = labels.copy()
         for idx, img in enumerate(images):
@@ -33,10 +33,10 @@ def shift_randomly_binary_labels(params):
             
         return (shifted_images, labels_binary)
     
-    return shift_randomly
+    return shift_randomly_binary_labels_curry
 
 def shift_randomly_position_labels(params):
-    def shift_randomly(images, labels, image_target_size):
+    def shift_randomly_position_labels_curry(images, labels, image_target_size):
         shifted_images = images.copy()
         labels_binary = labels.copy()
         for idx, img in enumerate(images):
@@ -47,8 +47,7 @@ def shift_randomly_position_labels(params):
             
         return (shifted_images, labels_binary)
     
-    return shift_randomly
-
+    return shift_randomly_position_labels_curry
 
 
 def add_noise(noise_level):
@@ -100,13 +99,13 @@ def cut_and_right_align(params, cut_margin=5):
         return (cut_images, np.array([labels_position, labels_letters]))
     return cut_and_right_align
 
-def cut_and_right_align_raw(params, cut_margin=5):
-    def cut_and_right_align(train_images, labels, image_target_size):
+def cut_and_right_align_raw(image_width, cut_margin=5):
+    def cut_and_right_align_raw_curry(train_images, labels, image_target_size):
         cut_images = train_images.copy()
         for idx,image in enumerate(train_images):
-            categorical_image_empty = np.zeros([image_target_size[0], params])
-            categorical_image_empty[:, params - int(labels[idx]) - cut_margin: params] = image[:, 0: int(labels[idx]) + cut_margin]
+            categorical_image_empty = np.zeros([image_target_size[0], image_width])
+            categorical_image_empty[:, image_width - int(labels[idx]) - cut_margin: image_width] = image[:, 0: int(labels[idx]) + cut_margin]
             cut_images[idx] = categorical_image_empty
 
         return (cut_images, labels)
-    return cut_and_right_align
+    return cut_and_right_align_raw_curry
