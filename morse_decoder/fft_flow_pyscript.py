@@ -14,7 +14,7 @@ from Image_Generator_helpers import  DataSets, set_paths, global_path
 from data_filters import min_n_letters_raw
 
 model_velocity = keras.models.load_model('saved_model_velocity_raw_23')
-model_regression = keras.models.load_model('saved_model_regresssion_raw')
+model_regression = keras.models.load_model('saved_model_regresssion_raw_2')
 model_categorical = keras.models.load_model('saved_model_categorical_raw')
 model_binary = keras.models.load_model('saved_raw_binary_2')
 TRAINING_IMAGE_DIMENSIONS = (5, 1400)
@@ -107,7 +107,7 @@ def letter_sequence(img_noise_rescaled):
         show_image(img_noise_rescaled, 1400,[0, 50, 100])
         return False
 
-    first_letter_position = model_regression(expand_image_dims(img_noise_rescaled)).numpy()[0][0] * 1400
+    first_letter_position = model_regression(expand_image_dims(img_noise_rescaled)).numpy()[0][0] * 1400 # regression model requires de_normalizing here
     first_letter_position_nodged = first_letter_position + NODGE_IMAGE_PIXEL_AMOUNT
 
 
