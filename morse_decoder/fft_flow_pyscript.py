@@ -16,7 +16,7 @@ from data_filters import min_n_letters_raw
 model_velocity = keras.models.load_model('saved_model_velocity_raw_23')
 model_regression = keras.models.load_model('saved_model_regresssion_raw')
 model_categorical = keras.models.load_model('saved_model_categorical_raw')
-model_binary = keras.models.load_model('saved_model_raw_binary')
+model_binary = keras.models.load_model('saved_raw_binary_2')
 TRAINING_IMAGE_DIMENSIONS = (5, 1400)
 NODGE_IMAGE_PIXEL_AMOUNT = 5 #Push the image to the left to adjust for incorrect position prediction
 CATEGORICAL_IMAGE_CROPPED_WIDTH = TRAINING_IMAGE_DIMENSIONS[1] - 1250 #Cropped with during traing of categorical prediction model"
@@ -68,35 +68,43 @@ def apply_noise(signal, signal_to_noise_ratio_db):
 
 ORIG_AUDIO_FILE_NAME = 'training_data/MorseTrainSet_23/AUDIO23/BOPAEWITAVZSEE_10400_23_010.wav'
 ORIG_AUDIO_FILE_NAME_2 = 'training_data/MorseTrainSet_23/AUDIO23/ZBGLAQEMPZZNBNA_14400_23_021.wav'
+ALICE = 'Alice.wav'
 
-SampleRate, signal = wavfile.read(ORIG_AUDIO_FILE_NAME_2)
+SampleRate, signal = wavfile.read(ALICE)
 length = signal.shape[0] / SampleRate
 
 signal = np.float32(signal)
 max = np.max(signal)
 signal = signal / max
 
-signal_to_noise_ratio_db = 0 # From 0 = no noise to -15 = significant noise
+signal_to_noise_ratio_db = 30 # From 0 = no noise to -15 = significant noise
 signal_noise = apply_noise(signal, signal_to_noise_ratio_db)
 img_noise = train_img_generate(signal_noise, FFT_JUMP)
 
 img_noise_rescaled = scale_velocity(img_noise)
 
+
+
+
 print("Correct: ")
 # print("BOPAEWITAVZSEE".lower())
-correct = "ZBGLAQEMPZZNBNA".lower()
-print(correct)
+# correct = "ZBGLAQEMPZZNBNA".lower()
+# print(correct)
+alice = "Alice was beginning"
+correct = alice.strip().replace(" ", "")
 print("----------------------------------")
 print("Prediction: ")
-
 
 letters = []
 def letter_sequence(img_noise_rescaled):
 
+
     signal_presence = model_binary(expand_image_dims(img_noise_rescaled)).numpy()[0][0]
 
     if (signal_presence < 0.5):
+        print("Signal presence not found")
         print(signal_presence)
+        show_image(img_noise_rescaled, 1400,[0, 50, 100])
         return False
 
     first_letter_position = model_regression(expand_image_dims(img_noise_rescaled)).numpy()[0][0] * 1400

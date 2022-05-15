@@ -62,13 +62,21 @@ class Image_Generator_RAW(keras.utils.Sequence) :
         
     def __len__(self) :
         return (np.ceil(self.image_amount) / float(self.batch_size)).astype(np.int32)
-    
+
+    def __insert_zeros__(self, signal, random_set: Random_Item):
+            if (randrange(0,10) == 1):
+                return np.insert(signal, int((random_set.csv_row["P1"].values[0] + 1) * 12860 / 200), np.zeros(randrange(0, 10000)))
+            
+            return signal
     
     def __getitem__(self, idx) :
 
         random_sets = [self.set_obj.get_random() for n in range(self.batch_size)]
         random_signals = [self.set_obj.get_item(random_set) for random_set in random_sets]
-        signals_shiftet = [np.insert(signal, 0, np.zeros(self.random_signal_indent[0] if self.random_signal_indent[0] == self.random_signal_indent[1] else randrange(*self.random_signal_indent)), axis=0) for signal in random_signals] ## prepend with 12840 zeros to align with image pixel 200
+        random_signals_with_spaces = [self.__insert_zeros__(random_signal, random_sets[idx]) for (idx, random_signal) in enumerate(random_signals)]
+
+        signals_shiftet = [
+            np.insert(signal, 0, np.zeros(self.random_signal_indent[0] if self.random_signal_indent[0] == self.random_signal_indent[1] else randrange(*self.random_signal_indent)), axis=0) for signal in random_signals_with_spaces] ## prepend with 12840 zeros to align with image pixel 200
         signal_noises = [self.__apply_noise(signal, randrange(self.noise_range[0], self.noise_range[1])) for signal in signals_shiftet]
         images_noise = [train_img_generate(signal_noise, self.FFT_JUMP) for signal_noise in signal_noises]
 
