@@ -1,5 +1,7 @@
 import json
 import time
+from multiprocessing import Pool
+
 def log_training(data_log):
     return {
         "data": data_log, 
@@ -36,3 +38,31 @@ class Training_Data_Log:
         self.__total_epochs = value
 
     total_epochs = property(_get_total_epochs, _set_total_epochs)
+
+
+def binary_comparer(prediction, correct):
+    return round(prediction[0]) == round(correct)
+
+
+def get_deviating_predictions(generator, model, comparer):
+
+    a_pool = Pool()
+
+    batches = a_pool.map(generator.__getitem__, [n for n in range(generator.__len__())])
+
+    total_differences = []
+
+    for imgs_batch, labels_batch in batches:
+
+        predictions = model.predict_on_batch(imgs_batch) ## make the predictions before the loop, then insert predictions into multiprocessing functions
+
+        for idx, image in enumerate(imgs_batch):
+
+            image = imgs_batch[idx]
+            image_prediction = predictions[idx]
+            label_correct = labels_batch[idx]
+
+            if (comparer(image_prediction, label_correct) == False):
+                total_differences.append([image_prediction, label_correct, image])
+
+    return total_differences
