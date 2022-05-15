@@ -8,6 +8,7 @@
 - fix json serialize model config in categorical data log
 - add type checking to logging class properties
 - random noise on each image in batch
-- experiment with crop width on velocity prediction 
 - crop width to json
 - fix json on raw data
+- experiment with smaller image width on regression prediction
+- implement fading patterns before noise calculation and test performance

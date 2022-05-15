@@ -44,6 +44,8 @@ class Random_Item:
 class DataSets:
     set_paths_list : "list[Set_Paths]"
     csv_files : "list[pd.DataFrame]" = []
+    min_first_letter_position : int = 200
+    max_first_letter_position : int = 0
     def __init__(self, set_paths_list, global_path, masks = ""):
         self.set_paths_list = set_paths_list
         self.global_path = global_path
@@ -58,6 +60,10 @@ class DataSets:
     def __cache_dataframes(self):
         for set_path in self.set_paths_list:
             csv: pd.DataFrame = read_csv(self.global_path + set_path.csv_file)
+            p1_min = csv["P1"].min()
+            p1_max = csv["P1"].max()
+            self.min_first_letter_position = p1_min if p1_min < self.min_first_letter_position else self.min_first_letter_position
+            self.max_first_letter_position = p1_max if p1_max > self.max_first_letter_position else self.max_first_letter_position
             idx_buffer: BufferedReader = open(self.global_path + set_path.long16_index, "rb")
             idx_array = np.reshape(np.fromfile(idx_buffer, dtype=np.float64), (-1,3))
             idx_buffer.close()

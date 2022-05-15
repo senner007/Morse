@@ -38,7 +38,7 @@ class Image_Generator(keras.utils.Sequence) :
 
 class Image_Generator_RAW(keras.utils.Sequence) :
     
-    def __init__(self, image_amount, set_obj: DataSets, FFT_JUMP, batch_size, image_target_size, image_prepocessors, noise_range, random_signal_indent, label_func) :
+    def __init__(self, image_amount, set_obj: DataSets, FFT_JUMP: int, batch_size: int, image_target_size: int, image_prepocessors, noise_range, random_signal_indent, label_func, label_post_process):
         self.FFT_JUMP = FFT_JUMP
         self.set_obj = set_obj
         self.image_amount = image_amount
@@ -48,6 +48,7 @@ class Image_Generator_RAW(keras.utils.Sequence) :
         self.noise_range= noise_range
         self.random_signal_indent = random_signal_indent
         self.label_func = label_func
+        self.label_post_process = label_post_process
         self.__set_noise()
 
     
@@ -77,5 +78,5 @@ class Image_Generator_RAW(keras.utils.Sequence) :
             ip = processor["func"](processor["params"])
             images_noise, labels = ip(images_noise, labels, self.image_target_size)
 
-        arrays =  np.array(images_noise), labels
+        arrays =  np.array(images_noise), self.label_post_process(labels, self.set_obj, random_sets)
         return arrays

@@ -42,7 +42,7 @@ def shift_randomly_position_labels(params):
         for idx, img in enumerate(images):
             shift = randrange(*params)
             shifted_left = np.pad(img, [(0,0),(0,abs(shift))], mode='constant')[:, abs(shift): image_target_size[1] + abs(shift)]
-            labels_binary[idx] = (labels[idx] + shift + 200) / 1400
+            labels_binary[idx] = (labels[idx] + shift + 200) # 200 constant should not be here. Find better solution
             shifted_images[idx] = shifted_left
             
         return (shifted_images, labels_binary)
@@ -98,4 +98,15 @@ def cut_and_right_align(params, cut_margin=5):
             cut_images.append(train_image_padded)
 
         return (cut_images, np.array([labels_position, labels_letters]))
+    return cut_and_right_align
+
+def cut_and_right_align_raw(params, cut_margin=5):
+    def cut_and_right_align(train_images, labels, image_target_size):
+        cut_images = train_images.copy()
+        for idx,image in enumerate(train_images):
+            categorical_image_empty = np.zeros([image_target_size[0], params])
+            categorical_image_empty[:, params - int(labels[idx]) - cut_margin: params] = image[:, 0: int(labels[idx]) + cut_margin]
+            cut_images[idx] = categorical_image_empty
+
+        return (cut_images, labels)
     return cut_and_right_align
