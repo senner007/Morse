@@ -1,4 +1,5 @@
 import numpy as np
+from Image_Generator_helpers import  DataSets, set_paths, global_path,Random_Item
 
 def min_letter_mask(dataFrame, letters: int):
     return (dataFrame['WORD'].str.split(expand=True).apply(lambda x: x.str.len()) >= letters).any(axis=1)
@@ -36,3 +37,7 @@ def tempo_interval(params):
         mask = tempo_interval_mask(dataFrame, params)
         return dataFrame[mask], fileNames[mask]
     return tempo_interval_curry
+
+# de-normalize the regression label position from 0-1 to actual pixel position 
+def position_labels_de_normalizer(label, max_position=89, min_position=2, shift_max=60):
+    return label * (max_position + shift_max - min_position) + min_position
