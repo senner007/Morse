@@ -12,14 +12,14 @@ class NoiseHandling(object): #   def __init__(self, name):
     BfHigh, AfHigh = signal.butter(5,WnHigh, btype='lowpass')
     BfLow, AfLow = signal.butter(4,WnLow, btype='highpass')
   
-    def NoiseGen1(self,Tarray):
-        s=np.shape(Tarray)
-        for k in range(s[1]):
-            rx1 = np.random.normal(0,1, s[0])
-            rx2=signal.filtfilt(NoiseHandling.BfHigh,NoiseHandling.AfHigh,rx1)
-            rx3=signal.filtfilt(NoiseHandling.BfHigh,NoiseHandling.AfHigh,rx2)
-            Tarray[:,k]=rx3
-        return Tarray
+    # def NoiseGen1(self,Tarray):  # What does this function do?
+    #     s=np.shape(Tarray)
+    #     for k in range(s[1]):
+    #         rx1 = np.random.normal(0,1, s[0])
+    #         rx2=signal.filtfilt(NoiseHandling.BfHigh,NoiseHandling.AfHigh,rx1)
+    #         rx3=signal.filtfilt(NoiseHandling.BfHigh,NoiseHandling.AfHigh,rx2)
+    #         Tarray[:,k]=rx3
+    #     return Tarray
 
     def addNoise(self,Sarray,SNRdB):
         s=np.shape(Sarray)

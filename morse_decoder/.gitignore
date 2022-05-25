@@ -9,3 +9,4 @@ __pycache__/
 results*.*
 /.ipynb_checkpoints
 /logs
+/Alice_audio

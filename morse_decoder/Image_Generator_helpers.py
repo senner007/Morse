@@ -5,9 +5,11 @@ import pandas as pd
 from pandas import read_csv
 from io import BufferedReader
 import time
+from random import randrange
 np.set_printoptions(suppress=True)
 
 global_path = "training_data/MorseTrainSet_23"
+POSITIONS = ["P1", "P2", "P3", "P4", "P5"]
 
 class Set_Paths:
     long16_bin: str
@@ -46,11 +48,12 @@ class DataSets:
     csv_files : "list[pd.DataFrame]" = []
     min_first_letter_position : int = 200
     max_first_letter_position : int = 0
-    def __init__(self, set_paths_list, global_path, masks = ""):
+    def __init__(self, set_paths_list, global_path, masks = "", positions=POSITIONS):
         self.set_paths_list = set_paths_list
         self.global_path = global_path
         self.__cache_dataframes()
         self.__apply_masks(masks)
+        self.positions = positions
 
     def __apply_masks(self, masks):
         for mask in masks:
@@ -75,12 +78,22 @@ class DataSets:
     def get_item_from_csv(self, set_choice):
         csv: pd.DataFrame = self.csv_files[set_choice]
         return csv.sample()
+    
+    def get_item_from_csv_bias(self, set_choice, bias):
+        csv: pd.DataFrame = self.csv_files[set_choice]
+        mask, randomArray = bias
+        r = randrange(randomArray[0], randomArray[1])
+        if r == 1:
+            mask = mask(csv)
+            return csv[mask].sample()
+        return csv.sample()
 
-    def get_random(self):
+    def get_random(self, bias):
         random_range = np.arange(start=0, stop=len(self.set_paths_list), step=1)
         set_choice: int  = random.choice(random_range)
         data_buffer_path = self.global_path + self.set_paths_list[set_choice].long16_bin
-        return Random_Item(data_buffer_path, self.get_item_from_csv(set_choice))
+        csv_item = self.get_item_from_csv_bias(set_choice, bias) if bias != 0 else self.get_item_from_csv(set_choice)
+        return Random_Item(data_buffer_path, csv_item)
     
     def get_item(self, random_set: Random_Item):
 

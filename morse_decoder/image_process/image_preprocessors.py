@@ -3,6 +3,8 @@ import random
 from image_process.image_process_helpers import shift_images_randomly, add_normalized_noise
 from random import randrange
 
+
+
 def shift_random_update_positions(params):
     def shift_random_update_positions(train_images, labels, image_target_size):
         train_images_padded, n =  shift_images_randomly(train_images, params, image_target_size)
@@ -24,12 +26,12 @@ def shift_randomly_binary_labels(params):
         labels_binary = labels.copy()
         for idx, img in enumerate(images):
             shift = randrange(*params)
-            shift_nothing = randrange(0,10) == 1
+            shift_nothing = randrange(0,20) == 1
             if (shift_nothing == True):
                 shift = 0
             shifted_left = np.pad(img, [(0,0),(0,abs(shift))], mode='constant')[:, abs(shift): image_target_size[1] + abs(shift)]
             labels_binary[idx] = 0 if shift > -150 else 1
-            shifted_images[idx] = shifted_left
+            shifted_images[idx] = shifted_left if shift_nothing == False else np.zeros(shifted_left.shape)
             
         return (shifted_images, labels_binary)
     
@@ -103,7 +105,10 @@ def cut_and_right_align_raw(image_width, cut_margin=5):
     def cut_and_right_align_raw_curry(train_images, labels, image_target_size):
         cut_images = train_images.copy()
         for idx,image in enumerate(train_images):
+            cut_margin: int = randrange(0, 40) # should be input and not hardcoded
             categorical_image_empty = np.zeros([image_target_size[0], image_width])
+            if (int(labels[idx]) + cut_margin > image_width):
+                cut_margin = 0
             categorical_image_empty[:, image_width - int(labels[idx]) - cut_margin: image_width] = image[:, 0: int(labels[idx]) + cut_margin]
             cut_images[idx] = categorical_image_empty
 

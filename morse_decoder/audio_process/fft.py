@@ -1,6 +1,11 @@
 from scipy.fft import fft
 import numpy as np
 
+SIGNAL_TO_PIXEL_CONSTANT = 12860
+
+
+def singal_length_to_pixels(signal_len):
+    return (signal_len / (SIGNAL_TO_PIXEL_CONSTANT / 200))
 
 def stfft(signal, jump, normalizer):
     fft_length=128
@@ -33,7 +38,8 @@ def get_highest_rows(fft_image):
 def cut_fft_image(fft_image, highest_rows_indexes):
     return fft_image[highest_rows_indexes.min() -1: highest_rows_indexes.min() +4]
 
-def fit_image_length(fft_image, size=(5,1400)):
+def fit_image_length(fft_image, size):
+    # print(fft_image.shape)
     if fft_image.shape[1] > size[1]: # cut fft image if more than allowed width
         fft_image = fft_image[:, :size[1]]
     spectrum_ext = np.zeros(size)
@@ -43,10 +49,12 @@ def fit_image_length(fft_image, size=(5,1400)):
 def expand_image_dims(fft_image):
     return np.expand_dims(fft_image, axis=0)
 
-def train_img_generate(signal, jump):
+def train_img_generate(signal, jump, signal_cut_off):
     spectrum_normalized, columns = stfft(signal.astype(np.float32), int(jump), normalizer)
     # highest_rows = get_highest_rows(spectrum_normalized) 
     # print(type(highest_rows), highest_rows)
     image_cut = cut_fft_image(spectrum_normalized, np.array([22,21])) # hardcoded rows to look for
-    image_fitted = fit_image_length(image_cut)
+    img_width = singal_length_to_pixels(signal_cut_off)
+
+    image_fitted = fit_image_length(image_cut, size=(5, int(img_width)))
     return image_fitted
