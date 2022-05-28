@@ -8,7 +8,7 @@
 - add custom metrics to replace testing and store to json during training
 - save images used for prediction during prediction flow to feature letter verification lookup
 - log prediction confidence score during prediction
-- train on tempo rescaled images also
+- train on tempo rescaled images also. Rescale before and after noise addition
 - create generator version that trains/tests faster on premade images
 
 ## DONE:
