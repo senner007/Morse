@@ -78,21 +78,12 @@ class DataSets:
     def get_item_from_csv(self, set_choice):
         csv: pd.DataFrame = self.csv_files[set_choice]
         return csv.sample()
-    
-    def get_item_from_csv_bias(self, set_choice, bias):
-        csv: pd.DataFrame = self.csv_files[set_choice]
-        mask, randomArray = bias
-        r = randrange(randomArray[0], randomArray[1])
-        if r == 1:
-            mask = mask(csv)
-            return csv[mask].sample()
-        return csv.sample()
 
-    def get_random(self, bias):
+    def get_random(self):
         random_range = np.arange(start=0, stop=len(self.set_paths_list), step=1)
         set_choice: int  = random.choice(random_range)
         data_buffer_path = self.global_path + self.set_paths_list[set_choice].long16_bin
-        csv_item = self.get_item_from_csv_bias(set_choice, bias) if bias != 0 else self.get_item_from_csv(set_choice)
+        csv_item = self.get_item_from_csv(set_choice)
         return Random_Item(data_buffer_path, csv_item)
     
     def get_item(self, random_set: Random_Item):
